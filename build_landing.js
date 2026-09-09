@@ -6,7 +6,8 @@ const workspaceDir = path.resolve(__dirname, '..');
 const outputFile = path.join(__dirname, 'index.html');
 
 // PIN configurations
-const EXPECTED_PIN = process.env.PIN || '5551';
+const EXPECTED_PIN = process.env.PIN || '791355';
+const EXPECTED_HASH = simpleHash(EXPECTED_PIN);
 const DEMO_PIN = process.env.DEMO_PIN || '0001';
 
 const ignoreDirs = ['node_modules', '.git', '.vscode', '.github', '_UNUSED', 'extra-slides', 'images', 'scratch', '_old', 'z_OLD', '_menus', '_backgrounds', '.venv', 'venv'];
@@ -73,6 +74,16 @@ function generateRepoCard(repo, borderColor, titleColor, icon) {
             </ul>
         </details>
     </div>`;
+}
+
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return hash.toString();
 }
 
 function buildHtml() {
@@ -224,6 +235,15 @@ function buildHtml() {
 
   <script>
     lucide.createIcons();
+    function simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return hash.toString();
+    }
 
     const manageBtn = document.getElementById('manage-links-btn');
     const downloadBtn = document.getElementById('download-archive-btn');
