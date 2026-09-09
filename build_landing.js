@@ -56,7 +56,14 @@ function generateRepoCard(repo, borderColor, titleColor, icon) {
     
     const linksHtml = htmlFiles.map(f => {
         const ghUrl = `../${repo}/${f}`;
-        return `<li><a href="${ghUrl}" target="_blank" class="mod-link"><i data-lucide="file"></i> ${f}</a></li>`;
+        const absoluteUrl = `https://mrmegatronix.github.io/${repo}/${f}`;
+        const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(absoluteUrl)}`;
+        return `<li style="display:flex; align-items:center; gap: 8px;">
+            <a href="${ghUrl}" target="_blank" class="mod-link" style="flex:1;"><i data-lucide="file"></i> ${f}</a>
+            <a href="${ghUrl}" target="_blank" title="Scan or Click to open in new window" style="display:block; flex-shrink:0; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+               <img src="${qrApi}" style="width: 44px; height: 44px; border-radius: 8px; background: white; padding: 2px;" alt="QR Code" />
+            </a>
+        </li>`;
     }).join('');
 
     return `
