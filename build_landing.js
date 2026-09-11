@@ -208,6 +208,7 @@ function buildHtml() {
     .manage-btn:hover { background: rgba(255,255,255,0.1); }
     .manage-actions { display: flex; gap: 10px; align-items: center; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body>
 
@@ -296,7 +297,78 @@ function buildHtml() {
         manageBtn.click();
         checkboxes.forEach(cb => cb.checked = false);
     });
-  </script>
+  
+    // Drag and Drop Logic
+    function initDragAndDrop() {
+        // Load saved card layout
+        const savedLayout = localStorage.getItem('ct-land-card-layout-' + window.location.pathname);
+        if (savedLayout) {
+            try {
+                const layout = JSON.parse(savedLayout);
+                const columns = document.querySelectorAll('.column-content');
+                Object.keys(layout).forEach(colIndex => {
+                    const col = columns[colIndex];
+                    if (col) {
+                        layout[colIndex].forEach(repo => {
+                            const card = document.querySelector(`.repo-card[data-repo="${repo}"]`);
+                            if (card) col.appendChild(card);
+                        });
+                    }
+                });
+            } catch (e) { console.error('Error loading layout', e); }
+        }
+
+        // Initialize Sortable for columns (Cards)
+        document.querySelectorAll('.column-content').forEach((col, index) => {
+            new Sortable(col, {
+                group: 'shared-columns',
+                animation: 150,
+                handle: '.repo-title', // drag by header
+                onEnd: function () {
+                    const layout = {};
+                    document.querySelectorAll('.column-content').forEach((c, i) => {
+                        layout[i] = Array.from(c.querySelectorAll('.repo-card')).map(card => card.getAttribute('data-repo'));
+                    });
+                    localStorage.setItem('ct-land-card-layout-' + window.location.pathname, JSON.stringify(layout));
+                }
+            });
+        });
+        
+        // Change cursor for draggable handles
+        document.querySelectorAll('.repo-title').forEach(el => el.style.cursor = 'grab');
+        // Load saved link layouts
+        document.querySelectorAll('.repo-card').forEach(card => {
+            const repo = card.getAttribute('data-repo');
+            const savedLinks = localStorage.getItem('ct-land-links-' + repo);
+            if (savedLinks) {
+                const list = card.querySelector('.repo-links');
+                if (list) list.innerHTML = savedLinks;
+            }
+        });
+
+        // Initialize Sortable for links inside cards
+        document.querySelectorAll('.repo-links').forEach((list) => {
+            new Sortable(list, {
+                group: 'shared-links',
+                animation: 150,
+                onEnd: function (evt) {
+                    const card = evt.to.closest('.repo-card');
+                    if (card) {
+                        const repo = card.getAttribute('data-repo');
+                        localStorage.setItem('ct-land-links-' + repo, evt.to.innerHTML);
+                    }
+                }
+            });
+            // Change cursor for links
+            list.querySelectorAll('li').forEach(li => li.style.cursor = 'grab');
+        });
+    
+    }
+    
+    // Call after DOM is ready
+    setTimeout(initDragAndDrop, 100);
+    
+</script>
 </body>
 </html>`;
 
