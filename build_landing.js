@@ -5,6 +5,16 @@ require('dotenv').config();
 const workspaceDir = path.resolve(__dirname, '..');
 const outputFile = path.join(__dirname, 'index.html');
 
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return hash.toString();
+}
+
 // PIN configurations
 const EXPECTED_PIN = process.env.PIN || '791355';
 const EXPECTED_HASH = simpleHash(EXPECTED_PIN);
@@ -310,7 +320,7 @@ function buildHtml() {
                     const col = columns[colIndex];
                     if (col) {
                         layout[colIndex].forEach(repo => {
-                            const card = document.querySelector(`.repo-card[data-repo="${repo}"]`);
+                            const card = document.querySelector('.repo-card[data-repo="' + repo + '"]');
                             if (card) col.appendChild(card);
                         });
                     }
